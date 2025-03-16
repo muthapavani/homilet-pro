@@ -1,0 +1,83 @@
+.h-section {
+    text-align: center;
+    padding: 50px 20px;
+    background: #f8f9fa;
+  }
+  
+  .h-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #020e01;
+  }
+
+  
+  .h-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .h-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  
+  .h-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .h-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .h-info {
+    padding: 15px;
+    text-align: left;
+  }
+  
+  .h-info h3 {
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .h-info p {
+    font-size: 1rem;
+    color: #777;
+    margin: 5px 0;
+  }
+  
+  .price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #27ae60;
+    display: block;
+    margin-top: 5px;
+  }
+  
+  .view-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    margin-top: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(90deg, #d35400, #27ae60);
+    border-radius: 20px;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .view-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  
