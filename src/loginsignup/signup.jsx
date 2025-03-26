@@ -11,48 +11,51 @@ function Signup() {
     password: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle input changes
   const handleInput = (event) => {
-    setValues((prev) => ({
+    const { name, value } = event.target;
+    setValues(prev => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: value,
     }));
 
-    if (errors[event.target.name]) {
-      setErrors((prev) => ({ ...prev, [event.target.name]: null }));
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
     }
 
+    // Clear server error when user modifies input
     if (serverError) {
       setServerError("");
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = SignValidation(values);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
+      setServerError("");
 
-      axios
-        .post("http://localhost:8081/signup", values)
-        .then((res) => {
-          setIsSubmitting(false);
-          alert(res.data.message);
-          navigate("/login");
-        })
-        .catch((err) => {
-          setIsSubmitting(false);
-          setServerError(err.response?.data?.error || "Signup failed. Please try again.");
-        });
+      try {
+        const response = await axios.post("http://localhost:8081/signup", values);
+        alert(response.data.message);
+        navigate("/login");
+      } catch (err) {
+        const errorMessage = err.response?.data?.message || 
+                             err.response?.data?.error || 
+                             "Signup failed. Please try again.";
+        setServerError(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -91,29 +94,33 @@ function Signup() {
             </div>
 
             <div className="form-group password-group">
-               <i className="fas fa-lock"></i>
-                  <input
-                   type={showPassword ? "text" : "password"}
-                   placeholder="Enter Password" 
-                   name="password"
-                   id="password" 
-                   onChange={handleInput}
-                   value={values.password}
-                   />
-                   <span
-                   className="password-toggle"
-                   onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? "👁" : "🚫"}
-                    </span>
-                    </div>
-                    {errors.password && <span className="error-message">{errors.password}</span>}
-                    {serverError && <div className="server-error">{serverError}</div>}{serverError && <div className="server-error">{serverError}</div>}
+              <i className="fas fa-lock"></i>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter Password" 
+                name="password"
+                id="password" 
+                onChange={handleInput}
+                value={values.password}
+              />
+              <span
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? "👁" : "🚫"}
+              </span>
+            </div>
+            {errors.password && <span className="error-message">{errors.password}</span>}
+            {serverError && <div className="server-error">{serverError}</div>}
 
-            <button type="submit" className="signup-btn" disabled={isSubmitting}>
+            <button 
+              type="submit" 
+              className="signup-btn" 
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Signing up..." : "Sign Up"}
             </button>
+
             <p className="login-link">
-            
               Already have an account? <Link to="/login">Login here</Link>
             </p>
           </form>

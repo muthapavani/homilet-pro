@@ -8,12 +8,10 @@ const Footer = () => {
   return (
     <footer id="footer" className="footer">
       <div className="footer-container">
-        
         <div className="footer-section logo-section">
           <img src={logo} alt="HomeLet Logo" className="footer-logo" />
           <p>Finding your perfect home should be simple. At Homelet, we connect people with properties they'll love.</p>
         </div>
-
         <div className="footer-section">
           <h3 className="footer-title">Quick Links</h3>
           <ul>
@@ -37,11 +35,10 @@ const Footer = () => {
         </div>
         <div className="footer-section">
           <h3 className="footer-title">Contact Us</h3>
-          <p><FaMapMarkerAlt /> 123 Property Lane, Suite 100</p>
+          <p><FaMapMarkerAlt /> kphb phase 1 road no 1 </p>
           <p><FaPhone /> (555) 123-4567</p>
-          <p><FaEnvelope /> info@homelet.com</p>
+          <p><FaEnvelope /> info@homilet.com</p>
         </div>
-
         <div className="footer-section">
           <h3 className="footer-title">Follow Us</h3>
           <div className="social-icons">

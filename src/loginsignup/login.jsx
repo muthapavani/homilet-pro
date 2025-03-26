@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Validation from "./login_val";
@@ -14,7 +14,29 @@ function Login() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // Password visibility state
+  const [isGuestLoggingIn, setIsGuestLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [serverStatus, setServerStatus] = useState("checking");
+
+  // Check if server is running on component mount
+  useEffect(() => {
+    const checkServerStatus = async () => {
+      try {
+        // Try a simple GET request to check if server is responding
+        await axios.get("http://localhost:8081/");
+        setServerStatus("online");
+      } catch (err) {
+        // If err.response exists, server is running but endpoint might not exist
+        if (err.response) {
+          setServerStatus("online");
+        } else {
+          setServerStatus("offline");
+        }
+      }
+    };
+
+    checkServerStatus();
+  }, []);
 
   // Handle input changes
   const handleInput = (event) => {
@@ -48,26 +70,70 @@ function Login() {
 
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
+      setServerError("");
 
       try {
         const res = await axios.post("http://localhost:8081/login", values);
-        setIsSubmitting(false);
         console.log("Login API Response:", res.data);
 
         if (res.data.token) {
           alert("Login Successful!");
           localStorage.setItem("token", `Bearer ${res.data.token}`);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
           navigate("/dashboard");
         } else {
           setServerError(res.data.error || "Invalid email or password");
         }
       } catch (err) {
-        setIsSubmitting(false);
         console.error("Login API Error:", err);
-        setServerError(
-          err.response?.data?.error || "Connection error. Please try again."
-        );
+        
+        if (err.response) {
+          setServerError(err.response.data.error || "Login failed. Please check your credentials.");
+        } else if (err.request) {
+          setServerError("Cannot connect to server. Please make sure the server is running.");
+        } else {
+          setServerError("An unexpected error occurred. Please try again.");
+        }
+      } finally {
+        setIsSubmitting(false);
       }
+    }
+  };
+
+  // Handle guest login
+  const handleGuestLogin = async () => {
+    setIsGuestLoggingIn(true);
+    setServerError("");
+
+    try {
+      console.log("Attempting guest login...");
+      
+      const res = await axios.post("http://localhost:8081/guest-login", {});
+      console.log("Guest Login Response:", res.data);
+
+      if (res.data.token) {
+        alert("Guest Login Successful!");
+        localStorage.setItem("token", `Bearer ${res.data.token}`);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        navigate("/dashboard");
+      } else {
+        setServerError(res.data.error || "Guest login failed");
+      }
+    } catch (err) {
+      console.error("Guest Login Error:", err);
+      
+      if (err.response) {
+        // The server responded with a status code outside the 2xx range
+        setServerError(err.response.data.error || "Guest login failed");
+      } else if (err.request) {
+        // The request was made but no response was received
+        setServerError("Cannot connect to server. Please make sure the server is running.");
+      } else {
+        // Something happened in setting up the request
+        setServerError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsGuestLoggingIn(false);
     }
   };
 
@@ -77,6 +143,14 @@ function Login() {
       <div className="d-flex justify-content-center align-items-center vh-100">
         <div className="login-container">
           <h2>Login</h2>
+          
+          {/* Server Status Indicator */}
+          {serverStatus === "offline" && (
+            <div className="server-status-warning">
+              Server appears to be offline. Please ensure your backend server is running.
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit}>
             {/* Email Input */}
             <div className="form-group">
@@ -96,18 +170,18 @@ function Login() {
             <div className="form-group password-field">
               <i className="fas fa-lock"></i>  
               <input
-              type={showPassword ? "text" : "password"} // Toggle input type
-              placeholder="Enter Password"
-              name="password"
-              id="password"
-              onChange={handleInput}
-              value={values.password}
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter Password"
+                name="password"
+                id="password"
+                onChange={handleInput}
+                value={values.password}
               />
               <div className="password-toggle" onClick={togglePasswordVisibility}>
                 {showPassword ? "👁" : "🚫"}
-                </div>
-                </div>
-                {errors.password && <span className="error-message">{errors.password}</span>}
+              </div>
+            </div>
+            {errors.password && <span className="error-message">{errors.password}</span>}
 
             {/* Forgot Password */}
             <div className="forgot-password">
@@ -118,8 +192,22 @@ function Login() {
             {serverError && <div className="server-error">{serverError}</div>}
 
             {/* Login Button */}
-            <button type="submit" className="login-btn" disabled={isSubmitting}>
+            <button 
+              type="submit" 
+              className="login-btn" 
+              disabled={isSubmitting || isGuestLoggingIn || serverStatus === "offline"}
+            >
               {isSubmitting ? "Logging in..." : "Login"}
+            </button>
+
+            {/* Guest Login Button */}
+            <button 
+              type="button" 
+              className="guest-login-btn" 
+              onClick={handleGuestLogin}
+              disabled={isSubmitting || isGuestLoggingIn || serverStatus === "offline"}
+            >
+              {isGuestLoggingIn ? "Creating guest account..." : "Continue as Guest"}
             </button>
 
             {/* Create Account Link */}

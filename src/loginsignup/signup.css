@@ -291,6 +291,33 @@
   .login-link a:hover {
     text-decoration: underline;
   }
+
+  /* Guest Login Button */
+.guest-login-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  background-color: #e6630b;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.5s;
+  
+}
+
+.guest-login-btn:hover {
+  transform: translateY(-2px);
+  background-color: #ee7b2f;
+}
+
+.guest-login-btn:disabled {
+  background-color: #ced4da;
+  cursor: not-allowed;
+}
+
+
   @media screen and (max-width: 768px) {
     .bg-mountain {
       background-position: 70% center; /* Adjust the focus point for tablets */
